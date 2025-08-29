@@ -1,0 +1,92 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-tables
+      author: assistant
+      changes:
+        - createTable:
+            tableName: roles
+            columns:
+              - column: { name: id, type: BIGSERIAL, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: name, type: VARCHAR(50), constraints: { unique: true, nullable: false } }
+        - createTable:
+            tableName: users
+            columns:
+              - column: { name: id, type: BIGSERIAL, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: username, type: VARCHAR(100), constraints: { unique: true, nullable: false } }
+              - column: { name: password, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: full_name, type: VARCHAR(255) }
+              - column: { name: enabled, type: BOOLEAN, defaultValueBoolean: true }
+        - createTable:
+            tableName: user_roles
+            columns:
+              - column: { name: user_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: role_id, type: BIGINT, constraints: { nullable: false } }
+        - addPrimaryKey:
+            tableName: user_roles
+            columnNames: user_id, role_id
+            constraintName: pk_user_roles
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_user_roles_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: user_roles
+            baseColumnNames: role_id
+            referencedTableName: roles
+            referencedColumnNames: id
+            constraintName: fk_user_roles_role
+            onDelete: CASCADE
+        - createTable:
+            tableName: cards
+            columns:
+              - column: { name: id, type: BIGSERIAL, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: user_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: number_encrypted, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: last4, type: VARCHAR(4), constraints: { nullable: false } }
+              - column: { name: holder, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: expiry_month, type: INTEGER, constraints: { nullable: false } }
+              - column: { name: expiry_year, type: INTEGER, constraints: { nullable: false } }
+              - column: { name: status, type: VARCHAR(20), constraints: { nullable: false } }
+              - column: { name: balance_minor, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: currency, type: VARCHAR(3), constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: cards
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_cards_user
+            onDelete: CASCADE
+        - createTable:
+            tableName: transfers
+            columns:
+              - column: { name: id, type: BIGSERIAL, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: user_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: from_card_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: to_card_id, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: amount_minor, type: BIGINT, constraints: { nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, defaultValueComputed: CURRENT_TIMESTAMP, constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: transfers
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_transfers_user
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: transfers
+            baseColumnNames: from_card_id
+            referencedTableName: cards
+            referencedColumnNames: id
+            constraintName: fk_transfers_from_card
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: transfers
+            baseColumnNames: to_card_id
+            referencedTableName: cards
+            referencedColumnNames: id
+            constraintName: fk_transfers_to_card
+            onDelete: RESTRICT
+
